@@ -1,132 +1,71 @@
 ---
 name: sci-introduction
 description: Diagnose, plan, draft, and rewrite SCI manuscript Introductions using Nature-style funnel logic. Use when Codex is asked to write, revise, or critique an Introduction; diagnose background-to-gap flow; sharpen novelty and contribution framing; convert research notes into English Introduction prose; or check for overlong setup, weak gap, vague "Here we" moves, method overload, figure-by-figure preview, overclaiming, or unstable terminology.
+metadata:
+  version: 1.1.0
+  author: Generic Nature-style Introduction workflow
 ---
 
-# SCI Introduction
+# SCI Introduction - Router
 
-This skill is a generic Introduction-writing coach for SCI manuscripts, with Nature-style structure as the default. It produces Chinese structural diagnosis and English replacement prose unless the user asks otherwise.
+This skill uses a router/static-dynamic split inspired by the `nature-*` skill layout:
 
-The skill must remain project-neutral. Do not store, repeat, or infer private manuscript details in the skill files. Use user-provided manuscript material only inside the current conversation.
+- `SKILL.md` is the short router and trigger surface.
+- `manifest.yaml` declares which static fragments to load for each request.
+- `static/` holds always-loaded stance, workflow, output format, and task/style/language fragments.
+- `references/` holds deeper supporting notes such as the video summary and Nature-style rules.
 
-## Non-Negotiable Inputs
+Do not apply the workflow from memory. When this skill is invoked, load the manifest and the matching fragments from disk.
 
-For drafting or rewriting an Introduction, require the manuscript body or a detailed body-level outline. The Introduction is treated as a late-stage section: it is written after the main body is clear and before the Abstract is finalized.
+## Routing Protocol
 
-Acceptable body content includes:
+### 1. Load The Manifest And Core Layer
 
-- Results, Methods, Discussion, or a complete main-text draft.
-- A detailed body outline with the study question, methods, main findings, evidence classes, limitations, and bounded contribution.
-- Figure-by-figure notes only if they are converted into the manuscript's argument and evidence classes before drafting.
+Read `manifest.yaml`, then read every file listed under `always_load`. These files define the body-first rule, privacy stance, video-guided intake, and output defaults.
 
-If the user provides only a title, topic, abstract, keywords, or a broad idea, do not draft the Introduction. Ask for body content and the core logic answers first.
+### 2. Detect Axis Values
 
-## Workflow
+Use the manifest's `detect` hints to choose:
 
-1. **Classify the task.**
-   - `diagnose`: the user provides an existing Introduction and wants critique.
-   - `rewrite`: the user provides an existing Introduction plus body content and wants replacement text.
-   - `draft`: the user provides body content or a complete body outline and wants a new Introduction.
-   - `coach`: the user asks for paragraph logic, gap framing, novelty framing, or revision strategy.
+- `task`: `diagnose`, `draft`, `rewrite`, or `coach`
+- `language`: `en` or `zh-to-en`
+- `style`: `nature` or `generic`
 
-2. **Load references only when useful.**
-   - For Nature-style guardrails and paragraph architecture, read `references/nature-introduction-rules.md`.
-   - For the Douyin video advice, short setup, or "不要写太长铺垫", read `references/video-notes.md`.
-   - Do not load or create project-specific references.
+State the detected axis values in one short line before drafting or rewriting so the user can correct them cheaply.
 
-3. **Verify body-first readiness.**
-   - For `draft` and `rewrite`, check whether the manuscript body or a sufficiently detailed body outline is present.
-   - If missing, pause and request it instead of drafting.
-   - For `diagnose`, use the existing Introduction but still ask for body content if judging contribution fit or rewriting is required.
+### 3. Load Matching Fragments
 
-4. **Ask the video-guided logic questions before drafting.**
-   Ask these questions unless the answers are already explicit in the manuscript body:
-   - Why is this field, problem, system, or task important?
-   - What specific problem remains unresolved?
-   - What does this study investigate, test, build, or explain?
+Read the static fragment for each detected axis value. Load only the selected fragments, not every file in `static/`.
 
-   If needed, add one short round of follow-up questions about the evidence classes, target journal, strongest result, and claim boundary. Keep each round to 2-4 questions.
+### 4. Apply The Body-First Gate
 
-5. **Reconstruct the manuscript logic.**
-   Combine the body content and the user's answers into a one-line argument:
+For drafting or rewriting an Introduction, require the manuscript body or a detailed body-level outline. If the user only provides a title, topic, abstract, keywords, or a broad idea, ask for body content before drafting.
 
-   `field stake -> bottleneck -> unresolved gap -> present study -> evidence preview -> bounded contribution`
+### 5. Ask The Three Video Questions
 
-   Identify any mismatch between the user's intended story and what the body actually supports before writing.
+Before writing prose, answer or ask:
 
-6. **Choose the paragraph architecture.**
-   - Default Nature-style architecture: 4-6 paragraphs, usually 5.
-   - Compress generic background. One crisp broad-background sentence is usually enough.
-   - Use the body evidence to decide how much prior-work synthesis and evidence preview the Introduction needs.
+1. Why is this field, problem, system, or task important?
+2. What specific problem remains unresolved?
+3. What does this study investigate, test, build, or explain?
 
-7. **Diagnose before rewriting.**
-   - Identify paragraph jobs, missing transitions, overlong background, literature-list behavior, vague gap, delayed contribution, method overload, overclaiming, and unstable terminology.
-   - Keep diagnosis in Chinese unless the user asks otherwise.
-   - Preserve any content the user explicitly says not to change.
+Then combine the answers with the manuscript body into:
 
-8. **Draft the replacement.**
-   - Produce English manuscript prose.
-   - Keep method details only where they make the gap and present move intelligible.
-   - Preview evidence by class rather than figure-by-figure or number-by-number.
-   - End with a bounded contribution claim that the body can support.
+`field stake -> bottleneck -> unresolved gap -> present study -> evidence preview -> bounded contribution`
 
-9. **Invite correction.**
-   - After a draft or rewrite, state only the key assumptions that could change the Introduction.
-   - Ask the user to correct those assumptions before polishing further.
+### 6. Draft Or Diagnose
 
-## Default Paragraph Jobs
+Use the loaded fragments in this priority order:
 
-Use this 5-paragraph funnel unless the user's manuscript clearly requires a 4- or 6-paragraph structure:
+1. Core stance and source hierarchy
+2. Core workflow
+3. Task-specific fragment
+4. Style fragment
+5. Language fragment
+6. On-demand references
 
-1. **Field stake.** Open with the phenomenon, system, disease burden, material challenge, computational task, or scientific problem. Do not open with a list of papers or a method name.
-2. **Bottleneck.** Name the conceptual, technical, measurement, mechanistic, or translational difficulty that makes the problem unresolved.
-3. **Prior attempts and residual gap.** Synthesize what existing work captures and why it still cannot answer the target question.
-4. **Present move.** State the framework, dataset, experiment, measurement, model, or conceptual move that addresses the gap.
-5. **Evidence preview and bounded claim.** Group the evidence classes and state what the study shows without overclaiming.
+Do not invent results, citations, limitations, mechanisms, clinical utility, or significance claims that are not supported by the manuscript body.
 
-## Output Defaults
+### 7. Reach For References Only When Needed
 
-For diagnosis:
-
-```markdown
-**结构诊断**
-- Paragraph jobs:
-- Main breakpoints:
-- Gap strength:
-- Contribution clarity:
-- Overclaiming / terminology risks:
-
-**修改策略**
-- Recommended funnel:
-- Sentences to compress:
-- Sentences to replace:
-- Questions to answer before rewriting:
-```
-
-For drafting or rewriting:
-
-```markdown
-**Logic Check**
-field stake -> bottleneck -> unresolved gap -> present study -> evidence preview -> bounded contribution
-
-**Recommended Funnel**
-1. ...
-
-**Replacement Introduction**
-[English prose]
-
-**Assumptions To Correct**
-- ...
-```
-
-## Nature-Style Guardrails
-
-- Start from the phenomenon, task, system, disease burden, or scientific problem, not from "X is important" boilerplate.
-- Avoid long generic background. Move quickly from field stake to unresolved problem.
-- Make the gap explain why the problem persists, not merely that "few studies" exist.
-- Do not list prior studies one by one; group them by what they enable and what they miss.
-- Make the "Here we" or "In this study" sentence answer the gap directly.
-- Do not turn the final paragraph into a figure roadmap.
-- Do not claim causality, mechanism, clinical utility, general superiority, or universal applicability unless the body supports it.
-- Keep terminology stable across the Introduction and the manuscript body.
-- Do not write an Introduction from the Abstract alone; the Abstract should be finalized after the Introduction.
+Use `references/video-notes.md` when the user mentions the Douyin video, short setup, or "不要写太长铺垫". Use `references/nature-introduction-rules.md` when the user needs deeper paragraph architecture, diagnosis, or a self-check.

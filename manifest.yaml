@@ -1,0 +1,55 @@
+name: sci-introduction
+version: 1.1.0
+description: >
+  Declarative manifest for the sci-introduction router/static split. SKILL.md
+  uses this file to decide which static fragments to load for Nature-style
+  Introduction diagnosis, drafting, rewriting, or coaching.
+
+always_load:
+  - static/core/stance.md
+  - static/core/workflow.md
+  - static/core/output-format.md
+
+axes:
+  task:
+    detect: >
+      Decide what kind of Introduction work the user wants. Use the user's
+      wording first. Use diagnose for critique, draft for a new Introduction,
+      rewrite for replacing an existing Introduction, and coach for structure,
+      gap, novelty, or strategy advice.
+    values:
+      diagnose: static/fragments/task/diagnose.md
+      draft: static/fragments/task/draft.md
+      rewrite: static/fragments/task/rewrite.md
+      coach: static/fragments/task/coach.md
+    default: coach
+    multi: false
+
+  language:
+    detect: >
+      Detect the source material language. Use zh-to-en when the user's notes,
+      manuscript draft, or requested workflow is Chinese or mixed Chinese-English.
+      Otherwise use en.
+    values:
+      en: static/fragments/language/en.md
+      zh-to-en: static/fragments/language/zh-to-en.md
+    default: en
+    multi: false
+
+  style:
+    detect: >
+      Use nature when the user asks for Nature, Nature-family, high-impact SCI,
+      compact funnel logic, or broad-audience framing. Use generic when the user
+      wants ordinary SCI structure without Nature-style compression.
+    values:
+      nature: static/fragments/style/nature.md
+      generic: static/fragments/style/generic.md
+    default: nature
+    multi: false
+
+references:
+  on_demand:
+    - condition: user mentions the Douyin video, short setup, or "不要写太长铺垫"
+      path: references/video-notes.md
+    - condition: deeper Nature-style architecture, paragraph jobs, diagnosis, or self-review is needed
+      path: references/nature-introduction-rules.md
