@@ -1,0 +1,4 @@
+interface:
+  display_name: "SCI Introduction"
+  short_description: "Diagnose and draft Nature-style SCI Introductions"
+  default_prompt: "Use $sci-introduction to diagnose and rewrite a Nature-style Introduction."
